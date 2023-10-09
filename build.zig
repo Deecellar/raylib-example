@@ -15,7 +15,26 @@ pub fn build(b: *std.Build) void {
     // set a preferred release mode, allowing the user to decide how to optimize.
     const optimize = b.standardOptimizeOption(.{});
 
-    const raylib_module = b.dependency("raylib", .{.optimize = optimize, .target = target});
+    const raylib_module = b.dependency("raylib", .{ .optimize = optimize, .target = target });
+    const raylib_artifact = raylib_module.artifact("raylib");
+
+    // We generate the implementation for raygui.h in raygui.c    
+    const generate_file_step_raylib_c = b.addWriteFiles();
+    const generated_file = generate_file_step_raylib_c.add("raygui/src/raygui.c", "#define RAYGUI_IMPLEMENTATION\n#include <raygui.h>");
+
+    // Raylib raygui.c supposes that raygui is in a nearby directory, this is not true using the package manager
+    // So we need to not depend on the raygui.c provided by raylib_module, but instead generate our own
+    // Workaround be like
+    const lib = b.addStaticLibrary(.{
+        .name = "raygui",
+        .root_source_file = generated_file,
+        .link_libc = true,
+        .optimize = optimize,
+        .target = target,
+    });
+    lib.addIncludePath(.{.path = "src/"});
+    lib.step.dependOn(&generate_file_step_raylib_c.step);
+    lib.linkLibrary(raylib_artifact); // raygui depends on raylib this should be linked in the artifact but sure
 
     const exe = b.addExecutable(.{
         .name = "raylib-example",
@@ -25,7 +44,10 @@ pub fn build(b: *std.Build) void {
         .target = target,
         .optimize = optimize,
     });
-    exe.linkLibrary(raylib_module.artifact("raylib"));
+    exe.linkLibrary(lib);
+    exe.linkLibrary(raylib_artifact);
+
+    exe.addIncludePath(.{.path = "src/"}); // for raygui.h in cInclude
 
     // This declares intent for the executable to be installed into the
     // standard location when the user invokes the "install" step (the default

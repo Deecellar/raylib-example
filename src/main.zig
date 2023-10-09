@@ -4,6 +4,7 @@ const raylib = @cImport({
     @cInclude("raylib.h");
     @cInclude("raymath.h");
     @cInclude("rlgl.h");
+    @cInclude("raygui.h");
 });
 
 pub fn main() !void {
@@ -16,11 +17,12 @@ pub fn main() !void {
 
         raylib.ClearBackground(raylib.RAYWHITE);
 
-        raylib.DrawText("Congrats! You created your first window!", 190, 200, 20, raylib.LIGHTGRAY);
-
+        // raygui button drawing
+        if (raylib.GuiButton(raylib.Rectangle{ .height = 350, .width = 200, .x = 100, .y = 40 }, "PRESS ME") > 0) {
+            try std.io.getStdOut().writeAll("Button pressed!\n");
+        }
         raylib.EndDrawing();
     }
 
     raylib.CloseWindow();
 }
-
