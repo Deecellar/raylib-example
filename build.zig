@@ -18,7 +18,7 @@ pub fn build(b: *std.Build) void {
     const raylib_module = b.dependency("raylib", .{ .optimize = optimize, .target = target });
     const raylib_artifact = raylib_module.artifact("raylib");
 
-    // We generate the implementation for raygui.h in raygui.c    
+    // We generate the implementation for raygui.h in raygui.c
     const generate_file_step_raylib_c = b.addWriteFiles();
     const generated_file = generate_file_step_raylib_c.add("raygui/src/raygui.c", "#define RAYGUI_IMPLEMENTATION\n#include <raygui.h>");
 
@@ -27,12 +27,14 @@ pub fn build(b: *std.Build) void {
     // Workaround be like
     const lib = b.addStaticLibrary(.{
         .name = "raygui",
-        .root_source_file = generated_file,
+        .root_source_file = null,
         .link_libc = true,
         .optimize = optimize,
         .target = target,
     });
-    lib.addIncludePath(.{.path = "src/"});
+    lib.addCSourceFile(.{.file = generated_file});
+    
+    lib.addIncludePath(.{ .path = "src/" });
     lib.step.dependOn(&generate_file_step_raylib_c.step);
     lib.linkLibrary(raylib_artifact); // raygui depends on raylib this should be linked in the artifact but sure
 
@@ -47,7 +49,7 @@ pub fn build(b: *std.Build) void {
     exe.linkLibrary(lib);
     exe.linkLibrary(raylib_artifact);
 
-    exe.addIncludePath(.{.path = "src/"}); // for raygui.h in cInclude
+    exe.addIncludePath(.{ .path = "src/" }); // for raygui.h in cInclude
 
     // This declares intent for the executable to be installed into the
     // standard location when the user invokes the "install" step (the default

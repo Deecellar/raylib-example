@@ -1,10 +1,11 @@
 .{
-    .name="example",
-    .version="0.0.1",
+    .name = "example",
+    .version = "0.0.1",
     .dependencies = .{
         .raylib = .{
-            .url = "https://github.com/raysan5/raylib/archive/bbbaae55621a854a6e69bcb9cfe1c6a5a8697e2c.tar.gz",
-            .hash = "1220c6ce9944c8e4b25ac15ce0bcc3c9b3ff433716df1a7dffa7c323ed38c2336c54",
+            .url = "https://github.com/raysan5/raylib/archive/54e0af40c1c534b3f3958264c67270434183639e.tar.gz",
+            .hash = "12201b30d2fc6e0965fdaad30961e80e007947e93ca56704163422875f0c968dc71a",
         },
-     },
+    },
+    .paths = .{ "build.zig", "build.zig.zon", "src" },
 }
